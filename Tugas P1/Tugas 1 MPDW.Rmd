@@ -191,7 +191,7 @@ plot(des.2)
 
 #ramalan
 ramalandes2<- forecast(des.2, h=27)
-ramalandes2
+ramalandes2    
 ```
 
 Selanjutnya jika ingin membandingkan plot data latih dan data uji adalah sebagai berikut.
