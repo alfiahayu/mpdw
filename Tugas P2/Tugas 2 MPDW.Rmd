@@ -2,7 +2,10 @@
 Tutitle: "Tugas 2 MPDW"
 author: "Alfiah Ayu Hapsari"
 date: "2023-09-10"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 ## Pemanggilan *Packages*
@@ -14,6 +17,12 @@ library(forecast)
 library(lmtest) #digunakan untuk uji formal pendeteksian autokorelasi
 library(orcutt) #untuk membuat model regresi Cochrane-Orcutt
 library(HoRM) #untuk membuat model regresi Hildreth-Lu
+library(graphics)
+library(TSA)
+library(ggplot2)
+library(corrplot)
+library(RColorBrewer)
+library(scales)
 ```
 
 ## Input Data
@@ -23,13 +32,31 @@ Sumber data : https://www.kaggle.com/datasets/theforcecoder/wind-power-forecasti
 
 ```{r}
 library(rio)
-data <- import("https://raw.githubusercontent.com/alfiahayu/mpdw/main/Tugas%20P2/Dataset%20Wind%20Power%20Forecasting.csv")
+data <- import("https://raw.githubusercontent.com/alfiahayu/mpdw/main/Tugas%20P2/Dataset2.csv")
 View(data)
 ```
+
 ## Eksplorasi Data
+Eksplorasi data yang dilakukan adalah dengan membuat matriks korelasi untuk melihat hubungan antara tiap peubah
+```{r}
+# Matriks korelasi
+data1 <- data[,-1] #Mengapus kolom yang bukan peubah numerik
+m <- cor(data1) 
 
-Sebelum melakukan regresi, akan diperlihatkan *plot time-series* dari suhu poros bantalan mesin (X1) dan Kecepatan angin (X2) 
+colors <- alpha(colorRampPalette(c("blue", #Warna Bawah
+                                   "#dbdbdb", #Warna Tengah
+                                   "red"))(10), #Warna Atas
+                                   alpha = 0.80) #Transparan
 
+corrplot(m, method = 'ellipse', type='lower', order='original', col=colors)
+corrplot(m, add=TRUE, method = 'number', type='upper', order='original',
+         tl.pos = "lt", 
+         tl.col = "black", col=colors)
+```
+Berdasarkan matriks korelasi terlihat hubungan yang cukup kuat antara tiap peubah yang dibuktikan dengan nilai korelasinya yang tinggi
+
+#Time Series
+Sebelum melakukan regresi, akan diperlihatkan *plot time-series* dari suhu bantalan gearbox (X1), Kecepatan angin (X2), dan tenaga yang dihasilkan (Y) 
 ```{r}
 #Membentuk objek time series
 data.ts1 <-ts(data$GearboxBearingTemperature)
@@ -48,7 +75,6 @@ points(data.ts2)
 ts.plot(data.ts3, xlab="Time Period ", ylab="Power Generated", main= "Time Series Plot of Power Generated")
 points(data.ts3)
 ```
-Data time series di atas berpola stasioner.
 
 ## Regresi
 ```{r}
@@ -57,7 +83,6 @@ Data time series di atas berpola stasioner.
 model <- lm(PowerGenerated~GearboxBearingTemperature+WindSpeed, data=data)
 summary(model)
 ```
-
 Model yang dihasilkan adalah $$y_i=119.397 - 16.178x_1 + 251.760x_2$$ Berdasarkan ringkasan model dapat diketahui bahwa hasil uji F memiliki *p-value* \< $\alpha$ (5%). Artinya, minimal terdapat satu variabel yang berpengaruh nyata terhadap model. Hasil uji-t parsial kedua parameter regresi, yaitu intersep dan koefisien regresi juga menunjukkan hal yang sama, yaitu memiliki *p-value* \< $\alpha$ (5%) sehingga nyata dalam taraf 5%. Selanjutnya dapat dilihat juga nilai $R^2=0.9231$. Artinya, sebesar 92.31% keragaman nilai Power Generated dapat dijelaskan oleh peubah Gearbox Bearing Temperature dan Wind Speed. Hasil ini menunjukkan hasil yang bagus, seolah mendapatkan hasil baik. Namun, kita perlu melakukan uji terhadap sisaannya seperti berikut ini.
 
 ```{r}
@@ -116,7 +141,7 @@ Penanganan metode Cochrane-Orcutt dapat dilakukan dengan bantuan packages Orcutt
 model2<-cochrane.orcutt(model)
 model2
 ```
-Hasil keluaran model setelah dilakukan penanganan adalah sebagai berikut. $$y_i=-2330.32544+49.94475x1_t+138.82258x2_t$$ Hasil juga menunjukkan bahwa nilai DW dan p-value meningkat menjadi $2.26460$ dan $0.9983$. Nilai DW sudah berada pada rentang DU \< DW \< 4-DU atau $1.85116 < DW < 2.14884$. Hal tersebut juga didukung dengan nilai *p-value* \> 0.05, artinya belum cukup bukti menyatakan bahwa sisaan terdapat autokorelasi pada taraf nyata 5%. Untuk nilai $ρ ̂$ optimum yang digunakan adalah $0.932342$. Nilai tersebut dapat diketahui dengan *syntax* berikut.
+Hasil keluaran model setelah dilakukan penanganan adalah sebagai berikut. $$y_i=-1755.36681 + 25.77734x_1 + 116.45353x_2$$ Hasil juga menunjukkan bahwa nilai DW dan p-value meningkat menjadi $2.14399$ dan $0.9447$. Nilai DW sudah berada pada rentang DU \< DW \< 4-DU atau $1.85116 < DW < 2.14884$. Hal tersebut juga didukung dengan nilai *p-value* \> 0.05, artinya belum cukup bukti menyatakan bahwa sisaan terdapat autokorelasi pada taraf nyata 5%. Untuk nilai $ρ ̂$ optimum yang digunakan adalah $0.932342$. Nilai tersebut dapat diketahui dengan *syntax* berikut.
 ```{r}
 #Rho optimum
 rho<- model2$rho
@@ -132,14 +157,6 @@ wind.trans<- data$WindSpeed[-1]-data$WindSpeed[-500]*rho
 model2manual<- lm(power.trans~temperature.trans+wind.trans)
 summary(model2manual)
 ```
-Lalu karena pada awal tadi asumsi kenormalan tidak terpenuhi, maka akan dilakukan pengecekan kembali asumsi kenormalan setelah model dilakukan penanganan menggunakan Cochrane-Orcutt.
-
-```{r}
-sisaan1 <- residuals(model2manual)
-ks.test(sisaan1, "pnorm", mean=mean(sisaan1), sd=sd(sisaan1))
-```
-Karena data yang digunakan berjumlah 500 dan termasuk kategori sampel yang besar maka uji yang digunakan adalah kolmogorov smirnov test. Berdasarkan uji formal  Kolmogorov-Smirnov didapatkan nilai *p-value* \> $\alpha$ (5%). Artinya, tidak cukup bukti untuk menyatakan sisaan tidak berdistribusi normal.
-
 Hasil model transformasi bukan merupakan model sesungguhnya. Koefisien regresi masih perlu dicari kembali mengikuti $β_0^*=β_0+ρ ̂β_0$ dan $β_1^*=β_1$ serta $β_2^*=β_2$.
 
 
@@ -180,7 +197,7 @@ r <- c(seq(0.1,0.9, by= 0.1))
 tab <- data.frame("rho" = r, "SSE" = sapply(r, function(i){deviance(hildreth.lu.func(i, model))}))
 round(tab, 4)
 ```
-Pertama-tama akan dicari di mana kira-kira $ρ$ yang menghasilkan SSE minimum. Pada hasil di atas terlihat $ρ$ minimum ketika 0.9. Namun, hasil tersebut masih kurang teliti sehingga akan dicari kembali $ρ$ yang lebih optimum dengan ketelitian yang lebih. Jika sebelumnya jarak antar $ρ$ yang dicari adalah 0.1, kali ini jarak antar $ρ$ adalah 0.001 dan dilakukan pada selang 0.8 sampai dengan 0.9.
+Pertama-tama akan dicari di mana kira-kira $ρ$ yang menghasilkan SSE minimum. Pada hasil di atas terlihat $ρ$ minimum ketika 0.9. Namun, hasil tersebut masih kurang teliti sehingga akan dicari kembali $ρ$ yang lebih optimum dengan ketelitian yang lebih. Jika sebelumnya jarak antar $ρ$ yang dicari adalah 0.1, kali ini jarak antar $ρ$ adalah 0.001 dan dilakukan pada selang 0.8 sampai dengan 0.99.
 
 ```{r}
 #Rho optimal di sekitar 0.9
@@ -205,7 +222,7 @@ summary(model3)
 #Transformasi Balik
 cat("y = ", coef(model3)[1]/(1-0.932), "+", coef(model3)[2],"x1","+", coef(model3)[3],"x2", sep = "")
 ```
-Setelah dilakukan tranformasi balik, didapatkan model dengan metode Hildreth-Lu sebagai berikut. $$y_i=-2328.767+49.9055x1_t+138.8289x2_t$$
+Setelah dilakukan tranformasi balik, didapatkan model dengan metode Hildreth-Lu sebagai berikut. $$y_i=-1754.07+25.75411x_1+116.4733x_2$$
 
 ```{r}
 #Deteksi autokorelasi
