@@ -32,7 +32,7 @@ Sumber data : https://www.kaggle.com/datasets/theforcecoder/wind-power-forecasti
 
 ```{r}
 library(rio)
-data <- import("https://raw.githubusercontent.com/alfiahayu/mpdw/main/Tugas%20P2/Dataset2.csv")
+data <- import("https://raw.githubusercontent.com/alfiahayu/mpdw/main/Pertemuan%202/Dataset2.csv")
 View(data)
 ```
 
