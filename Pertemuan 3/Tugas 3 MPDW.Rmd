@@ -198,7 +198,7 @@ Dari tabel di atas, dapat terlihat bahwa nilai AIC terendah didapat ketika $p=15
 model.ardl <- ardlDlm(x = train$Xt, y = train$Yt, p = 15 , q = 3)
 summary(model.ardl)
 ```
-Terdapat 2 peubah yang berpengaruh signifikan terhadap nilai Generator pada selang kepercayaan 95% yaitu $X_t$ dan $X_{t-11}$. Artinya, menurut model ARDL dengan $p=15$ dan $q=3$, nilai Generator saat ini dipengaruhi oleh nilai power pada saat ini, serta 110 menit sebelumnya. Model keseluruhannya adalah sebagai berikut:
+Terdapat 2 peubah yang berpengaruh signifikan terhadap nilai Generator pada selang kepercayaan 95% yaitu $X_t$ dan $X_{t-12}$. Artinya, menurut model ARDL dengan $p=15$ dan $q=3$, nilai Generator saat ini dipengaruhi oleh nilai power pada saat ini, serta 120 menit sebelumnya. Model keseluruhannya adalah sebagai berikut:
 
 $$
 \hat{Y}=760.12968+2.64703X_t-0.46574X_{t-1}+...+0.00245Y_{t-2}-0.01241Y_{t-3}
@@ -220,6 +220,7 @@ GoF(model.ardl)
 ```
 
 Model tersebut merupakan model yang sangat baik dengan nilai MAPE yang kurang dari 10%. Selain itu, berdasarkan akurasi di atas, terlihat bahwa nilai MAPE keduanya tidak jauh berbeda. Artinya, model regresi dengan model autoregressive ini tidak overfitted atau underfitted.
+
 
 ## Pemodelan DLM & ARDL dengan Library `dynlm`
 
@@ -306,7 +307,7 @@ colnames(akurasi) <- c("MAPE")
 akurasi
 ```
 
-Berdasarkan nilai MAPE, model paling optimum didapat pada DLM karena memiliki nilai MAPE yang terkecil.
+Berdasarkan nilai MAPE, model paling optimum didapat pada DLM 2 karena memiliki nilai MAPE yang terkecil.
 
 ### Plot
 ```{r}
@@ -323,4 +324,4 @@ lines(test$Xt, fore.ardl$forecasts,col="green")
 legend("topleft",c("aktual", "koyck","DLM 1","DLM 2", "autoregressive"), lty=1, col=c("black","red","blue","orange","green"), cex=0.8)
 ```
 
-Berdasarkan plot tersebut, terlihat bahwa plot yang paling mendekati data aktualnya adalah Model DLM, sehingga dapat disimpulkan model terbaik dalam hal ini adalah model DLM
+Berdasarkan plot tersebut, terlihat bahwa plot yang paling mendekati data aktualnya adalah Model DLM, sehingga dapat disimpulkan model terbaik dalam hal ini adalah model DLM 2.
