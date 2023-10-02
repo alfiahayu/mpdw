@@ -15,7 +15,7 @@ library(tseries)
 library(MASS)
 ```
 
-### Impor Data
+### Input Data
 ```{r}
 library(rio)
 data <- import("https://raw.githubusercontent.com/alfiahayu/mpdw/main/Data/data%20mpdw.csv")
@@ -96,7 +96,7 @@ acf(dt_data)
 ```
 
 
-Berdasarkan plot ACF, terlihat bahwa plot ACF pada data tersebut cenderung *tails off slowly* sehingga bisa dikatakann data tidak stasioner dalam rataan.
+Berdasarkan plot ACF, terlihat bahwa plot ACF pada data tersebut cenderung *tails off slowly* sehingga bisa dikatakan data tidak stasioner dalam rataan.
 
 #### Uji ADF
 
@@ -148,7 +148,7 @@ Plot deret waktu di atas menunjukkan bahwa data tidak stasioner dalam rataan, di
 acf(dt_data2)
 ```
 
-Berdasarkan plot ACF, terlihat bahwa plot ACF pada data tersebut cenderung *tails off* sehingga dapat dikatakan data tidak stasioner dalam rataan.
+Berdasarkan plot ACF, terlihat bahwa plot ACF pada data tersebut cenderung *tails off slowly* sehingga dapat dikatakan data tidak stasioner dalam rataan.
 
 #### Uji ADF
 
@@ -179,4 +179,4 @@ Gambar di atas menunjukkan nilai *rounded value* ($\lambda$) optimum sebesar **0
 
 
 ### Kesimpulan
-Dapat disimpulkan bahwa data tidak stasioner dalam rataan dan tidak stationer dalam ragam.
+Dapat disimpulkan bahwa data keseluruhan tidak stasioner dalam rataan dan tidak stationer dalam ragam. Namun pada partisi data ke 2 dari data ke 90-139 data termasuk stasioner dalam ragam.
