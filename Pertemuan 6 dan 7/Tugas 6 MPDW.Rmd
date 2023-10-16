@@ -32,7 +32,7 @@ data.ts<-ts(data)
 ### Eksplorasi Data
 
 #### Plot Data Penuh
-
+   
 ```{r}
 plot.ts(data.ts, lty=1, xlab="Periode", ylab="Harga", main="Data Harga Minyak Goreng")
 ```
@@ -154,8 +154,6 @@ eacf(train.diff2)
 
 Identifikasi model menggunakan plot EACF dilakukan dengan melihat ujung segitiga pada pola segitiga nol. Dalam hal ini model tentatif yang terbentuk adalah ARIMA(1,2,1), ARIMA(0,2,2), dan ARIMA(1,2,2).
 
-Model yang dipilih untuk dilakukan pendugaan yaitu model dari plot EACF, karena jika dilihat dari plot ACF dan PACF-nya tidak ada yg cuts off di lag pertama, sehingga jika menggunakan model dari plot ACF dan PACF ordo yang dihasilkan terlalu besar.
-
 ## Pendugaan Parameter Model Tentatif
 
 ### ARIMA(0,2,1)
@@ -187,7 +185,7 @@ lmtest::coeftest(model3.da) #seluruh parameter signifikan
 ```{r}
 model4.da=Arima(train.diff2, order=c(0,2,2),method="ML")
 summary(model4.da) #AIC=1673.22
-lmtest::coeftest(model4.da) #terdapat parameter yang tidak signifikan
+lmtest::coeftest(model4.da)  #seluruh parameter signifikan
 ```
 
 ### ARIMA(1,2,2)
@@ -219,7 +217,7 @@ pacf(sisaan.da)
 par(mfrow = c(1,1))
 ```
 
-Berdasarkan plot kuantil-kuantil normal, secara eksplorasi ditunjukkan sisaan tidak menyebar normal ditandai dengan titik titik yang cenderung tidak mengikuti garis $45^{\circ}$. Kemudian dapat dilihat juga lebar pita sisaan yang berbeda menandakan bahwa sisaan memiliki ragam yang heterogen. Plot ACF dan PACF sisaan ARIMA(1,2,2) signifikan pada lag ke 6 yang menandakan ada indikasi sisaan tidak saling bebas. Kondisi ini akan diuji lebih lanjut dengan uji formal.
+Berdasarkan plot kuantil-kuantil normal, secara eksplorasi ditunjukkan sisaan tidak menyebar normal ditandai dengan titik titik yang cenderung tidak mengikuti garis $45^{\circ}$. Kemudian dapat dilihat juga lebar pita sisaan yang cenderung sama menandakan bahwa sisaan memiliki ragam yang homogen. Plot ACF dan PACF sisaan ARIMA(1,2,2) signifikan pada lag ke 6 yang menandakan ada indikasi sisaan tidak saling bebas. Kondisi ini akan diuji lebih lanjut dengan uji formal.
 
 ### Uji Formal
 
